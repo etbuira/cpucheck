@@ -37,9 +37,11 @@ static void shouldstop_sig_handler(int signum)
 }
 
 extern struct cpucheck_checker cpucheck_checker_addsub;
+extern struct cpucheck_checker cpucheck_checker_muldiv;
 
 static struct cpucheck_checker const * const checkers[] = {
 	&cpucheck_checker_addsub,
+	&cpucheck_checker_muldiv,
 	NULL
 };
 
