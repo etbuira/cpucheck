@@ -1,0 +1,11 @@
+== cpucheck
+It computes an initial table, and check it over and over again to catch any inconsistency
+
+== Building
+srcdir$ autoreconf -i
+builddir$ /srcdir/configure
+builddir$ make
+
+== License
+This is released under GPLv2
+
