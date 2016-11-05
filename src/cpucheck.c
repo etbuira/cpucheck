@@ -28,6 +28,8 @@
 #endif
 #include "cpucheck.h"
 
+#define min(a, b) ((a)<(b)?(a):(b))
+
 static volatile int *should_stop;
 
 static void shouldstop_sig_handler(int signum)
@@ -84,6 +86,7 @@ struct thread_state {
 	struct state * state;
 	size_t start_idx;
 	unsigned long int inconsistencies;
+	unsigned long int checks;
 };
 
 struct state {
@@ -110,6 +113,8 @@ static void * thread_func(void *arg)
 				if (ULONG_MAX-thrd->inconsistencies)
 					thrd->inconsistencies++;
 			}
+			if (thrd->checks < ULONG_MAX)
+				thrd->checks++;
 		}
 	}
 
@@ -120,7 +125,7 @@ static int run(struct args const * const args)
 {
 	struct state state = { .checker = args->checker, .should_exit = 0 };
 	size_t tno;
-	unsigned long int inc_cnt;
+	unsigned long int inc_cnt, check_cnt;
 	struct sigaction sa;
 	int r;
 
@@ -168,6 +173,7 @@ static int run(struct args const * const args)
 		state.threads[tno].state = &state;
 		state.threads[tno].start_idx = random()%args->table_size;
 		state.threads[tno].inconsistencies = 0;
+		state.threads[tno].checks = 0;
 		if (pthread_create(&state.threads[tno].thread, NULL, thread_func, &state.threads[tno])) {
 			size_t tnob;
 			pthread_mutex_lock(&state.output);
@@ -182,12 +188,14 @@ static int run(struct args const * const args)
 		}
 	}
 
-	for (inc_cnt=0, tno=0 ; tno<args->nb_threads ; tno++) {
+	for (inc_cnt=0, check_cnt=0, tno=0 ; tno<args->nb_threads ; tno++) {
 		pthread_join(state.threads[tno].thread, NULL);
-		inc_cnt += ULONG_MAX-inc_cnt > state.threads[tno].inconsistencies ? state.threads[tno].inconsistencies : ULONG_MAX-inc_cnt;
+		inc_cnt += min(ULONG_MAX-inc_cnt, state.threads[tno].inconsistencies);
+		check_cnt += min(ULONG_MAX-check_cnt, state.threads[tno].checks);
 	}
 
-	fprintf(stdout, "Detected %lu inconsistencies\n", inc_cnt);
+	fprintf(stdout, "Detected %lu inconsistencies over %s%lu tests\n", inc_cnt,
+			check_cnt==ULONG_MAX?"possibly more than ":"", check_cnt);
 	r = 0;
 
 err_mutex:
