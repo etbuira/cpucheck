@@ -11,6 +11,7 @@ AC_PROG_CC_C99
 if test x$ac_cv_prog_cc_c99 = xno; then
 	AC_MSG_ERROR([No C99 compiler found])
 fi
+AC_CHECK_PROG([UNAME], [uname], [yes], [no])
 AM_PROG_CC_C_O
 
 AC_SEARCH_LIBS([pthread_create], [pthread], [], [AC_MSG_ERROR([Could not find pthread library])])
@@ -22,6 +23,12 @@ AC_TYPE_SIZE_T
 
 AC_FUNC_MALLOC
 AC_CHECK_FUNCS([sched_getaffinity])
+
+if test x$UNAME = xyes; then
+	if test x$(uname -m) = xx86_64; then
+		AC_DEFINE([ARCH_X86_64])
+	fi
+fi
 
 AC_CONFIG_FILES([Makefile])
 
