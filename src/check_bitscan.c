@@ -63,6 +63,7 @@ static int check_item(void const * const table, const size_t index)
 		: [ri] "=r" (ri), [rz] "=r" (rz),
 		  [li] "=r" (li), [lz] "=r" (lz)
 		: [a] "rm" (elts[index].a)
+		: "cc"
 	);
 
 	return ! (
