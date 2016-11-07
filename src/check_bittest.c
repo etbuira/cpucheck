@@ -29,6 +29,7 @@ struct bt {
 	unsigned short int set:1;
 	uint64_t toggled;
 	uint64_t cleared;
+	uint64_t set_ts;
 };
 
 struct elt {
@@ -42,6 +43,8 @@ struct comp_bt {
 	uint64_t res_tc;
 	uint8_t set_tr;
 	uint64_t res_tr;
+	uint8_t set_ts;
+	uint64_t res_ts;
 };
 
 struct comp {
@@ -62,6 +65,7 @@ static int init_table(void *table, const size_t table_size)
 			elts[i].tests[j].set = !! (elts[i].a & 1ULL<<elts[i].tests[j].bit_index);
 			elts[i].tests[j].toggled = elts[i].a ^ 1ULL<<elts[i].tests[j].bit_index;
 			elts[i].tests[j].cleared = elts[i].a & ~(1ULL<<elts[i].tests[j].bit_index);
+			elts[i].tests[j].set_ts = elts[i].a | 1ULL<<elts[i].tests[j].bit_index;
 		}
 	}
 
@@ -83,9 +87,13 @@ static int check_item(void * const comp, void const * const table, const size_t 
 			"movq %[a], %[res_tr] \n\t"
 			"btrq %[bidx], %[res_tr] \n\t"
 			"setcb %[set_tr] \n\t"
+			"movq %[a], %[res_ts] \n\t"
+			"btsq %[bidx], %[res_ts] \n\t"
+			"setcb %[set_ts] \n\t"
 		: [set_t] "=r" (c->res[j].set_t),
 		  [set_tc] "=r" (c->res[j].set_tc), [res_tc] "=r" (c->res[j].res_tc),
-		  [set_tr] "=r" (c->res[j].set_tr), [res_tr] "=r" (c->res[j].res_tr)
+		  [set_tr] "=r" (c->res[j].set_tr), [res_tr] "=r" (c->res[j].res_tr),
+		  [set_ts] "=r" (c->res[j].set_ts), [res_ts] "=r" (c->res[j].res_ts)
 		: [a] "mr" (elts[index].a),
 		  [bidx] "r" (elts[index].tests[j].bit_index)
 		: "cc"
@@ -96,8 +104,10 @@ static int check_item(void * const comp, void const * const table, const size_t 
 		if (c->res[j].set_t != elts[index].tests[j].set
 				|| c->res[j].set_t != c->res[j].set_tc
 				|| c->res[j].set_tc != c->res[j].set_tr
+				|| c->res[j].set_tr != c->res[j].set_ts
 				|| c->res[j].res_tc != elts[index].tests[j].toggled
-				|| c->res[j].res_tr != elts[index].tests[j].cleared)
+				|| c->res[j].res_tr != elts[index].tests[j].cleared
+				|| c->res[j].res_ts != elts[index].tests[j].set_ts)
 			return 1;
 	}
 
@@ -113,16 +123,19 @@ static void report_error(FILE *out, void const * const table, const size_t index
 	fprintf(out, "a=%" PRIx64 "\n", elts[index].a);
 	for(j=0 ; j<sizeof(elts[index].tests)/sizeof(elts[index].tests[0]) ; j++) {
 		fprintf(out, "Bit index=%" PRIx64 "\n", elts[index].tests[j].bit_index);
-		fprintf(out, "Bit set, expected: %s, got (bt): %s, got (btc): %s, got (btr): %s\n",
+		fprintf(out, "Bit set, expected: %s, got (bt): %s, got (btc): %s, got (btr): %s, got (bts): %s\n",
 					elts[index].tests[j].set?"yes":"no", c->res[j].set_t?"yes":"no",
-					c->res[j].set_tc?"yes":"no", c->res[j].set_tr?"yes":"no");
+					c->res[j].set_tc?"yes":"no", c->res[j].set_tr?"yes":"no",
+					c->res[j].set_ts?"yes":"no");
 		fprintf(out, "btc result, expected=%" PRIx64 ", got=%" PRIx64 "\n",
 					elts[index].tests[j].toggled, c->res[j].res_tc);
 		fprintf(out, "btr result, expected=%" PRIx64 ", got=%" PRIx64 "\n",
 					elts[index].tests[j].cleared, c->res[j].res_tr);
+		fprintf(out, "bts result, expected=%" PRIx64 ", got=%" PRIx64 "\n",
+					elts[index].tests[j].set_ts, c->res[j].res_ts);
 	}
 }
 
-CPUCHECK_CHECKER(bittest, "Performs bit testing (bt, btc, btr)", sizeof(struct elt), sizeof(struct comp), init_table, check_item, report_error, NULL)
+CPUCHECK_CHECKER(bittest, "Performs bit testing (bt, btc, btr, bts)", sizeof(struct elt), sizeof(struct comp), init_table, check_item, report_error, NULL)
 
 #endif
