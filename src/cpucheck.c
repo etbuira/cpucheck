@@ -85,6 +85,7 @@ struct thread_state {
 	pthread_t thread;
 	struct state * state;
 	size_t start_idx;
+	void *comp;
 	unsigned long int inconsistencies;
 	unsigned long int checks;
 };
@@ -106,9 +107,11 @@ static void * thread_func(void *arg)
 
 	for (start=1 ; !thrd->state->should_exit ; start=0) {
 		for (idx = start ? thrd->start_idx : 0 ; idx<thrd->state->table_size && !thrd->state->should_exit ; idx++) {
-			if (thrd->state->checker->check_item(thrd->state->table, idx)) {
+			if (thrd->state->checker->check_item(thrd->comp, thrd->state->table, idx)) {
 				pthread_mutex_lock(&thrd->state->output);
 				fprintf(stderr, "Inconsistency detected...\n");
+				if (thrd->state->checker->report_error)
+					thrd->state->checker->report_error(stderr, thrd->state->table, idx, thrd->comp);
 				pthread_mutex_unlock(&thrd->state->output);
 				if (ULONG_MAX-thrd->inconsistencies)
 					thrd->inconsistencies++;
@@ -121,6 +124,68 @@ static void * thread_func(void *arg)
 	return NULL;
 }
 
+static int init_state(struct state *state, struct args const * const args)
+{
+	unsigned int tno;
+
+	if (SIZE_MAX/args->checker->table_elt_size < args->table_size) {
+		fprintf(stderr, "Requested table size is too big\n");
+		return -1;
+	}
+	if (SIZE_MAX/sizeof(*state->threads) < args->nb_threads) {
+		fprintf(stderr, "Requested thread count is too big\n");
+		return -1;
+	}
+
+	state->table = malloc(args->table_size*args->checker->table_elt_size);
+	if (!state->table) {
+		fprintf(stderr, "Could not allocate table\n");
+		return -1;
+	}
+	state->table_size = args->table_size;
+
+	if (args->checker->init_table(state->table, args->table_size)) {
+		fprintf(stderr, "Error while initialising table\n");
+		goto err_table;
+	}
+
+	state->threads = malloc(sizeof(*state->threads) * args->nb_threads);
+	if (!state->threads) {
+		fprintf(stderr, "Could not allocate threads states\n");
+		goto err_table;
+	}
+
+	for (tno=0 ; tno<args->nb_threads ; tno++) {
+		state->threads[tno].state = state;
+		state->threads[tno].start_idx = random()%args->table_size;
+		state->threads[tno].comp = malloc(args->checker->comp_elt_size);
+		if (!state->threads[tno].comp) {
+			unsigned int tno2;
+
+			for (tno2=0 ; tno2<tno ; tno++)
+				free(state->threads[tno2].comp);
+			goto err_threads;
+		}
+		state->threads[tno].inconsistencies = 0;
+		state->threads[tno].checks = 0;
+	}
+
+	if (pthread_mutex_init(&state->output, NULL)) {
+		fprintf(stderr, "Could not allocate output mutex\n");
+		goto err_threads;
+	}
+
+	return 0;
+
+err_threads:
+	free(state->threads);
+err_table:
+	if (args->checker->delete_table)
+		args->checker->delete_table(state->table, args->table_size);
+	free(state->table);
+	return -1;
+}
+
 static int run(struct args const * const args)
 {
 	struct state state = { .checker = args->checker, .should_exit = 0 };
@@ -129,40 +194,8 @@ static int run(struct args const * const args)
 	struct sigaction sa;
 	int r;
 
-	if (SIZE_MAX/args->checker->table_elt_size < args->table_size) {
-		fprintf(stderr, "Requested table size is too big\n");
+	if (init_state(&state, args))
 		return -1;
-	}
-	if (SIZE_MAX/sizeof(*state.threads) < args->nb_threads) {
-		fprintf(stderr, "Requested thread count is too big\n");
-		return -1;
-	}
-
-	state.table = malloc(args->table_size*args->checker->table_elt_size);
-	if (!state.table) {
-		fprintf(stderr, "Could not allocate table\n");
-		return -1;
-	}
-	state.table_size = args->table_size;
-
-	if (args->checker->init_table(state.table, args->table_size)) {
-		fprintf(stderr, "Error while initialising table\n");
-		r = -1;
-		goto err_table;
-	}
-
-	state.threads = malloc(sizeof(*state.threads) * args->nb_threads);
-	if (!state.threads) {
-		fprintf(stderr, "Could not allocate threads states\n");
-		r = -1;
-		goto err_table;
-	}
-
-	if (pthread_mutex_init(&state.output, NULL)) {
-		fprintf(stderr, "Could not allocate output mutex\n");
-		r = -1;
-		goto err_threads;
-	}
 
 	should_stop = &state.should_exit;
 	memset(&sa, 0, sizeof(sa));
@@ -170,10 +203,6 @@ static int run(struct args const * const args)
 	sigaction(SIGINT, &sa, NULL);
 
 	for (tno=0 ; tno < args->nb_threads ; tno++) {
-		state.threads[tno].state = &state;
-		state.threads[tno].start_idx = random()%args->table_size;
-		state.threads[tno].inconsistencies = 0;
-		state.threads[tno].checks = 0;
 		if (pthread_create(&state.threads[tno].thread, NULL, thread_func, &state.threads[tno])) {
 			size_t tnob;
 			pthread_mutex_lock(&state.output);
@@ -202,9 +231,9 @@ static int run(struct args const * const args)
 err_mutex:
 	pthread_mutex_destroy(&state.output);
 	should_stop = NULL;
-err_threads:
+	for (tno=0 ; tno<args->nb_threads ; tno++)
+		free(state.threads[tno].comp);
 	free(state.threads);
-err_table:
 	if (args->checker->delete_table)
 		args->checker->delete_table(state.table, args->table_size);
 	free(state.table);

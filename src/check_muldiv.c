@@ -25,6 +25,10 @@ struct elt {
 	unsigned long int res;
 };
 
+struct comp {
+	unsigned long int res;
+};
+
 static int init_table(void *table, const size_t table_size)
 {
 	size_t i;
@@ -45,12 +49,24 @@ static int init_table(void *table, const size_t table_size)
 	return 0;
 }
 
-static int check_item(void const * const table, const size_t index)
+static int check_item(void * const comp, void const * const table, const size_t index)
 {
 	struct elt const * const elts = table;
+	struct comp * const c = comp;
 
-	return ! (elts[index].a/elts[index].b*elts[index].c == elts[index].res);
+	c->res = elts[index].a / elts[index].b * elts[index].c;
+
+	return ! (c->res == elts[index].res);
 }
 
-CPUCHECK_CHECKER(muldiv, "Performs integer multiplications and divisions", sizeof(struct elt), init_table, check_item, NULL)
+static void report_error(FILE *out, void const * const table, const size_t index, void const * const comp)
+{
+	struct elt const * const elts = table;
+	struct comp const * const c = comp;
+
+	fprintf(out, "a=%lu, b=%lu, c=%lu ; expected=%lu, got=%lu\n", elts[index].a, elts[index].b,
+			elts[index].c, elts[index].res, c->res);
+}
+
+CPUCHECK_CHECKER(muldiv, "Performs integer multiplications and divisions", sizeof(struct elt), sizeof(struct comp), init_table, check_item, report_error, NULL)
 

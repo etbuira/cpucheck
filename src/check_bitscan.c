@@ -18,6 +18,7 @@
 
 #include <stdlib.h>
 #include <stdint.h>
+#include <inttypes.h>
 #include <time.h>
 #include "cpucheck.h"
 
@@ -26,6 +27,13 @@ struct elt {
 	int zero:1;
 	uint64_t ri;
 	uint64_t li;
+};
+
+struct comp {
+	uint64_t ri;
+	uint64_t li;
+	uint8_t rz;
+	uint8_t lz;
 };
 
 static int init_table(void *table, const size_t table_size)
@@ -50,31 +58,41 @@ static int init_table(void *table, const size_t table_size)
 	return 0;
 }
 
-static int check_item(void const * const table, const size_t index)
+static int check_item(void * const comp, void const * const table, const size_t index)
 {
 	struct elt const * const elts = table;
-	uint64_t ri, li;
-	uint8_t rz, lz;
+	struct comp * const c = comp;
 
 	asm("bsfq %[a], %[ri] \n\t"
 		"setzb %[rz] \n\t"
 		"bsrq %[a], %[li] \n\t"
 		"setzb %[lz] \n\t"
-		: [ri] "=r" (ri), [rz] "=r" (rz),
-		  [li] "=r" (li), [lz] "=r" (lz)
+		: [ri] "=r" (c->ri), [rz] "=r" (c->rz),
+		  [li] "=r" (c->li), [lz] "=r" (c->lz)
 		: [a] "rm" (elts[index].a)
 		: "cc"
 	);
 
 	return ! (
-		elts[index].zero == rz
-		&& rz == lz
-		&& (rz || elts[index].ri == ri)
-		&& (rz || elts[index].li == li)
+		elts[index].zero == c->rz
+		&& c->rz == c->lz
+		&& (c->rz || elts[index].ri == c->ri)
+		&& (c->rz || elts[index].li == c->li)
 	);
 }
 
-CPUCHECK_CHECKER(bitscan, "Performs bit scanning (bsf/bsr)", sizeof(struct elt), init_table, check_item, NULL)
+static void report_error(FILE *out, void const * const table, const size_t index, void const * const comp)
+{
+	struct elt const * const elts = table;
+	struct comp const * const c = comp;
+
+	fprintf(out, "a=0x%" PRIx64 "\n", elts[index].a);
+	fprintf(out, "Right index: expected=0x%" PRIx64 ", got=0x%" PRIx64 "\n", elts[index].ri, c->ri);
+	fprintf(out, "Left index: expected=0x%" PRIx64 ", got=0x%" PRIx64 "\n", elts[index].li, c->li);
+	fprintf(out, "Found bit set, by right: %s, by left: %s", c->rz?"false":"true", c->lz?"false":"true");
+}
+
+CPUCHECK_CHECKER(bitscan, "Performs bit scanning (bsf/bsr)", sizeof(struct elt), sizeof(struct comp), init_table, check_item, report_error, NULL)
 
 #endif /* ARCH_X86_64 */
 
