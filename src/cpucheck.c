@@ -194,7 +194,8 @@ static int run(struct args const * const args)
 		check_cnt += min(ULONG_MAX-check_cnt, state.threads[tno].checks);
 	}
 
-	fprintf(stdout, "Detected %lu inconsistencies over %s%lu tests\n", inc_cnt,
+	fprintf(stdout, "Detected %s%lu inconsistencies over %s%lu tests\n",
+			inc_cnt==ULONG_MAX?"possibly more than ":"", inc_cnt,
 			check_cnt==ULONG_MAX?"possibly more than ":"", check_cnt);
 	r = 0;
 
