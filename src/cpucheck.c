@@ -45,6 +45,9 @@ extern struct cpucheck_checker cpucheck_checker_bittest;
 #endif
 extern struct cpucheck_checker cpucheck_checker_bool;
 extern struct cpucheck_checker cpucheck_checker_muldiv;
+#if ARCH_X86_64
+extern struct cpucheck_checker cpucheck_checker_signextend;
+#endif
 
 static struct cpucheck_checker const * const checkers[] = {
 	&cpucheck_checker_addsub,
@@ -54,6 +57,9 @@ static struct cpucheck_checker const * const checkers[] = {
 #endif
 	&cpucheck_checker_bool,
 	&cpucheck_checker_muldiv,
+#if ARCH_X86_64
+	&cpucheck_checker_signextend,
+#endif
 	NULL
 };
 
