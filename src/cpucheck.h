@@ -43,7 +43,7 @@ struct cpucheck_checker {
 		.delete_table = arg_delete_table, \
 	};
 
-unsigned long int ulirandom();
-uint64_t u64random();
+unsigned long int ulirandom(void);
+uint64_t u64random(void);
 
 #endif

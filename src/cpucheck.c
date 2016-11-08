@@ -66,7 +66,7 @@ static struct cpucheck_checker const * const checkers[] = {
 
 #define NIBLE_COUNT(tofill, niblesz) ( (tofill)/(niblesz) + !!((tofill)%(niblesz)) )
 
-unsigned long int ulirandom()
+unsigned long int ulirandom(void)
 {
 	size_t i;
 	unsigned long int res;
@@ -77,7 +77,7 @@ unsigned long int ulirandom()
 	return res;
 }
 
-uint64_t u64random()
+uint64_t u64random(void)
 {
 	size_t i;
 	uint64_t res;
