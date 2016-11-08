@@ -18,6 +18,7 @@
 #define CPUCHECK_H
 
 #include <stdio.h>
+#include <stdint.h>
 
 struct cpucheck_checker {
 	char const * const name;
@@ -41,5 +42,8 @@ struct cpucheck_checker {
 		.report_error = arg_report_error, \
 		.delete_table = arg_delete_table, \
 	};
+
+unsigned long int ulirandom();
+uint64_t u64random();
 
 #endif

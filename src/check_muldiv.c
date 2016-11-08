@@ -38,8 +38,8 @@ static int init_table(void *table, const size_t table_size)
 
 	for (i=0 ; i<table_size ; i++) {
 		unsigned long int a, b;
-		a = random();
-		b = random();
+		a = ulirandom();
+		b = ulirandom();
 		elts[i].a = a < b ? b : a;
 		elts[i].b = a < b ? a : b;
 		elts[i].c = random();

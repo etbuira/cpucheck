@@ -59,7 +59,7 @@ static int init_table(void *table, const size_t table_size)
 	srandom(time(NULL));
 
 	for(i=0 ; i<table_size ; i++) {
-		elts[i].a = random();
+		elts[i].a = u64random();
 		for(j=0 ; j<sizeof(elts[i].tests)/sizeof(elts[i].tests[0]) ; j++) {
 			elts[i].tests[j].bit_index = random()%64;
 			elts[i].tests[j].set = !! (elts[i].a & 1ULL<<elts[i].tests[j].bit_index);

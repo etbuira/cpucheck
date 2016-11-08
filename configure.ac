@@ -3,6 +3,7 @@ AC_PREREQ([2.69])
 
 AC_CONFIG_SRCDIR([src/cpucheck.c])
 AC_CONFIG_AUX_DIR([build-aux])
+AC_CONFIG_MACRO_DIR([acm4])
 
 AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects])
 
@@ -29,6 +30,8 @@ if test x$UNAME = xyes; then
 		AC_DEFINE([ARCH_X86_64])
 	fi
 fi
+
+CPUCHECK_RANDOM_NIBLE_SIZE
 
 AC_CONFIG_FILES([Makefile])
 

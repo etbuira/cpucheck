@@ -63,6 +63,30 @@ static struct cpucheck_checker const * const checkers[] = {
 	NULL
 };
 
+#define NIBLE_COUNT(tofill, niblesz) ( (tofill)/(niblesz) + !!((tofill)%(niblesz)) )
+
+unsigned long int ulirandom()
+{
+	size_t i;
+	unsigned long int res;
+
+	for(i=res=0 ; i<NIBLE_COUNT(sizeof(unsigned long int)*8, RANDOM_NIBLE_SIZE) ; i++)
+		res |= random() << (i*RANDOM_NIBLE_SIZE);
+
+	return res;
+}
+
+uint64_t u64random()
+{
+	size_t i;
+	uint64_t res;
+
+	for(i=res=0 ; i<NIBLE_COUNT(sizeof(uint64_t)*8, RANDOM_NIBLE_SIZE) ; i++)
+		res |= (uint64_t) random() << (i*RANDOM_NIBLE_SIZE);
+
+	return res;
+}
+
 struct args {
 	unsigned long table_size;
 	unsigned int nb_threads;

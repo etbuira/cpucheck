@@ -44,8 +44,8 @@ static int init_table(void *table, const size_t table_size)
 	srandom(time(NULL));
 
 	for(i=0 ; i<table_size ; i++) {
-		elts[i].a = random();
-		elts[i].b = random();
+		elts[i].a = u64random();
+		elts[i].b = u64random();
 		elts[i].and = elts[i].a & elts[i].b;
 		elts[i].or = elts[i].a | elts[i].b;
 		elts[i].xor = elts[i].a ^ elts[i].b;

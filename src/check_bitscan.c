@@ -45,7 +45,7 @@ static int init_table(void *table, const size_t table_size)
 	srandom(time(NULL));
 
 	for(i=0 ; i<table_size ; i++) {
-		elts[i].a = random();
+		elts[i].a = u64random();
 		elts[i].zero = !elts[i].a;
 		if (!elts[i].zero) {
 			for(j=0 ; !((elts[i].a >> j) & 1) ; j++) ;

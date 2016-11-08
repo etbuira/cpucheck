@@ -37,9 +37,9 @@ static int init_table(void *table, const size_t table_size)
 	srandom(time(NULL));
 
 	for(i=0 ; i<table_size ; i++) {
-		elts[i].a = random();
-		elts[i].b = random();
-		elts[i].c = random();
+		elts[i].a = ulirandom();
+		elts[i].b = ulirandom();
+		elts[i].c = ulirandom();
 		elts[i].res = elts[i].a + elts[i].b - elts[i].c;
 	}
 

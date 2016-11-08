@@ -58,17 +58,17 @@ static int init_table(void *table, const size_t table_size)
 	srandom(time(NULL));
 
 	for (i=0 ; i<table_size ; i++) {
-		elts[i].byte = random();
+		elts[i].byte = u64random();
 		elts[i].byte_ex = elts[i].byte;
-		elts[i].word = random();
+		elts[i].word = u64random();
 		elts[i].word_ex = elts[i].word;
 		elts[i].word_exl = elts[i].word;
 		elts[i].word_exh = elts[i].word < 0 ? -1 : 0;
-		elts[i].dword = random();
+		elts[i].dword = u64random();
 		elts[i].dword_ex = elts[i].dword;
 		elts[i].dword_exl = elts[i].dword;
 		elts[i].dword_exh = elts[i].dword < 0 ? -1 : 0;
-		elts[i].qword = random();
+		elts[i].qword = u64random();
 		elts[i].qword_exl = elts[i].qword;
 		elts[i].qword_exh = elts[i].qword < 0 ? -1 : 0;
 	}
