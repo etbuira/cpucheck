@@ -319,6 +319,10 @@ static int parse_args(struct args * const args, int argc, char *argv[])
 					fprintf(stderr, "Could not parse %s as integer\n", optarg);
 					return -1;
 				}
+				if (!tmpul) {
+					fprintf(stderr, "Needs a non-null table size\n");
+					return -1;
+				}
 				args->table_size = tmpul;
 				break;
 			case 't':
