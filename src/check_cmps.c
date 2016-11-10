@@ -169,9 +169,9 @@ static int check_item(void * const comp, void const * const table, const size_t 
 			return 1;
 		if (c->mismatch_quad[i] != elts[index].mismatch_quad[i])
 			return 1;
-		if (c->too_much)
-			return 1;
 	}
+	if (c->too_much)
+		return 1;
 
 	return 0;
 }
