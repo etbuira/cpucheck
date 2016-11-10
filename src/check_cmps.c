@@ -129,8 +129,8 @@ err:
 		asm("repz " arg_cmp_op " \n\t" \
 			"setzb %[zf] \n\t" \
 			: "+c" (rem_len), [zf] "=mr" (zf) \
-			: "S" (elts[index].a+stridx*arg_word_size), \
-			  "D" (elts[index].b+stridx*arg_word_size) \
+			: "S" (elts[index].a+stridx*(arg_word_size)), \
+			  "D" (elts[index].b+stridx*(arg_word_size)) \
 			: "cc" \
 		); \
 		\
