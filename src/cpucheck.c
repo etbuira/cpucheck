@@ -88,6 +88,28 @@ uint64_t u64random(void)
 	return res;
 }
 
+void hex_dump(FILE *out, char const * const what, char const * const todump, const size_t len)
+{
+	size_t i;
+
+	if (what)
+		fprintf(out, "%s\n", what);
+
+	for(i=0 ; i<len ; i++) {
+		if (!(i%16))
+			fprintf(out, "%04zx: ", i);
+
+		fprintf(out, "%02hhx ", *(todump+i));
+
+		if (i%8 == 7) {
+			fprintf(out, i%16 == 7 ? " " : "\n");
+		}
+	}
+
+	if (len%16)
+		fprintf(out, "\n");
+}
+
 struct args {
 	unsigned long table_size;
 	unsigned int nb_threads;

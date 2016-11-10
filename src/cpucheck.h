@@ -46,4 +46,6 @@ struct cpucheck_checker {
 unsigned long int ulirandom(void);
 uint64_t u64random(void);
 
+void hex_dump(FILE *out, char const * const what, char const * const todump, const size_t len);
+
 #endif
