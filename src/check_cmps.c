@@ -112,8 +112,8 @@ static int init_table(void *table, const size_t table_size)
 
 err:
 	for(j=0 ; j<i ; j++) {
-		free(elts[i].a);
-		free(elts[i].b);
+		free(elts[j].a);
+		free(elts[j].b);
 	}
 	return r;
 }
