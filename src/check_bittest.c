@@ -53,7 +53,7 @@ struct comp {
 	struct comp_bt res[TEST_COUNT];
 };
 
-static int init_table(void *table, const size_t table_size)
+static int init(void * const config, void *table, const size_t table_size)
 {
 	size_t i, j;
 	struct elt * const elts = table;
@@ -74,7 +74,7 @@ static int init_table(void *table, const size_t table_size)
 	return 0;
 }
 
-static int check_item(void * const comp, void const * const table, const size_t index)
+static int check_item(void * const comp, void const * const config, void const * const table, const size_t index)
 {
 	struct elt const * const elts = table;
 	struct comp * const c = comp;
@@ -116,7 +116,7 @@ static int check_item(void * const comp, void const * const table, const size_t 
 	return 0;
 }
 
-static void report_error(FILE *out, void const * const table, const size_t index, void const * const comp)
+static void report_error(FILE *out, void const * const config, void const * const table, const size_t index, void const * const comp)
 {
 	struct elt const * const elts = table;
 	struct comp const * const c = comp;
@@ -138,6 +138,6 @@ static void report_error(FILE *out, void const * const table, const size_t index
 	}
 }
 
-CPUCHECK_CHECKER(bittest, "Performs bit testing (bt, btc, btr, bts)", sizeof(struct elt), sizeof(struct comp), init_table, check_item, report_error, NULL)
+CPUCHECK_CHECKER(bittest, "Performs bit testing (bt, btc, btr, bts)", 0, sizeof(struct elt), sizeof(struct comp), init, check_item, report_error, NULL)
 
 #endif

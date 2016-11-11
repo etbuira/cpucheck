@@ -30,7 +30,7 @@ struct comp {
 	unsigned long int res;
 };
 
-static int init_table(void *table, const size_t table_size)
+static int init(void * const config, void *table, const size_t table_size)
 {
 	size_t i;
 	struct elt * const elts = table;
@@ -47,7 +47,7 @@ static int init_table(void *table, const size_t table_size)
 	return 0;
 }
 
-static int check_item(void * const comp, void const * const table, const size_t index)
+static int check_item(void * const comp, void const * const config, void const * const table, const size_t index)
 {
 	struct elt const * const elts = table;
 	struct comp * const c = comp;
@@ -57,7 +57,7 @@ static int check_item(void * const comp, void const * const table, const size_t 
 	return ! (c->res == elts[index].res);
 }
 
-static void report_error(FILE *out, void const * const table, const size_t index, void const * const comp)
+static void report_error(FILE *out, void const * const config, void const * const table, const size_t index, void const * const comp)
 {
 	struct elt const * const elts = table;
 	struct comp const * const c = comp;
@@ -66,5 +66,5 @@ static void report_error(FILE *out, void const * const table, const size_t index
 			elts[index].c, elts[index].res, c->res);
 }
 
-CPUCHECK_CHECKER(addsub, "Performs integer addition and substractions", sizeof(struct elt), sizeof(struct comp), init_table, check_item, report_error, NULL)
+CPUCHECK_CHECKER(addsub, "Performs integer addition and substractions", 0, sizeof(struct elt), sizeof(struct comp), init, check_item, report_error, NULL)
 

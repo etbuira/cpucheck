@@ -152,6 +152,7 @@ struct thread_state {
 };
 
 struct state {
+	void *checker_conf;
 	size_t table_size;
 	void * table;
 	struct cpucheck_checker const * const checker;
@@ -168,11 +169,11 @@ static void * thread_func(void *arg)
 
 	for (start=1 ; !thrd->state->should_exit ; start=0) {
 		for (idx = start ? thrd->start_idx : 0 ; idx<thrd->state->table_size && !thrd->state->should_exit ; idx++) {
-			if (thrd->state->checker->check_item(thrd->comp, thrd->state->table, idx)) {
+			if (thrd->state->checker->check_item(thrd->comp, thrd->state->checker_conf, thrd->state->table, idx)) {
 				pthread_mutex_lock(&thrd->state->output);
 				fprintf(stderr, "Inconsistency detected...\n");
 				if (thrd->state->checker->report_error)
-					thrd->state->checker->report_error(stderr, thrd->state->table, idx, thrd->comp);
+					thrd->state->checker->report_error(stderr, thrd->state->checker_conf, thrd->state->table, idx, thrd->comp);
 				pthread_mutex_unlock(&thrd->state->output);
 				if (ULONG_MAX-thrd->inconsistencies)
 					thrd->inconsistencies++;
@@ -198,14 +199,20 @@ static int init_state(struct state *state, struct args const * const args)
 		return -1;
 	}
 
+	state->checker_conf = malloc(args->checker->config_size);
+	if (!state->checker_conf) {
+		fprintf(stderr,"Could not allocate checker config\n");
+		return -1;
+	}
+
 	state->table = malloc(args->table_size*args->checker->table_elt_size);
 	if (!state->table) {
 		fprintf(stderr, "Could not allocate table\n");
-		return -1;
+		goto err_conf;
 	}
 	state->table_size = args->table_size;
 
-	if (args->checker->init_table(state->table, args->table_size)) {
+	if (args->checker->init(state->checker_conf, state->table, args->table_size)) {
 		fprintf(stderr, "Error while initialising table\n");
 		goto err_table;
 	}
@@ -241,9 +248,11 @@ static int init_state(struct state *state, struct args const * const args)
 err_threads:
 	free(state->threads);
 err_table:
-	if (args->checker->delete_table)
-		args->checker->delete_table(state->table, args->table_size);
+	if (args->checker->delete)
+		args->checker->delete(state->checker_conf, state->table, args->table_size);
 	free(state->table);
+err_conf:
+	free(state->checker_conf);
 	return -1;
 }
 
@@ -295,9 +304,10 @@ err_mutex:
 	for (tno=0 ; tno<args->nb_threads ; tno++)
 		free(state.threads[tno].comp);
 	free(state.threads);
-	if (args->checker->delete_table)
-		args->checker->delete_table(state.table, args->table_size);
+	if (args->checker->delete)
+		args->checker->delete(state.checker_conf, state.table, args->table_size);
 	free(state.table);
+	free(state.checker_conf);
 
 	return r;
 }

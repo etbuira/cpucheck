@@ -77,7 +77,7 @@ static void introduce_mismatches(struct elt * const elt)
 	}
 }
 
-static int init_table(void *table, const size_t table_size)
+static int init(void * const config, void *table, const size_t table_size)
 {
 	size_t i, j;
 	struct elt * const elts = table;
@@ -147,7 +147,7 @@ err:
 	for ( ; mmidx < MISMATCH_COUNT ; mmidx++) \
 		(arg_mm)[mmidx] = -1; \
 } while (0);
-static int check_item(void * const comp, void const * const table, const size_t index)
+static int check_item(void * const comp, void const * const config, void const * const table, const size_t index)
 {
 	struct elt const * const elts = table;
 	struct comp * const c = comp;
@@ -186,7 +186,7 @@ static int check_item(void * const comp, void const * const table, const size_t 
 	for (i=0 ; i<MISMATCH_COUNT ; i++) \
 		fprintf(out, "%d%s", (arg_mm_got)[i], i==MISMATCH_COUNT-1 ? "\n" : ", "); \
 } while (0);
-static void report_error(FILE *out, void const * const table, const size_t index, void const * const comp)
+static void report_error(FILE *out, void const * const config, void const * const table, const size_t index, void const * const comp)
 {
 	struct elt const * const elts = table;
 	struct comp const * const c = comp;
@@ -202,7 +202,7 @@ static void report_error(FILE *out, void const * const table, const size_t index
 }
 #undef PRINT_MM
 
-static void delete_table(void *table, const size_t table_size)
+static void delete(void * const config, void *table, const size_t table_size)
 {
 	struct elt * const elts = table;
 	size_t i;
@@ -213,6 +213,6 @@ static void delete_table(void *table, const size_t table_size)
 	}
 }
 
-CPUCHECK_CHECKER(cmps, "Performs string comparisons on different word sizes (cmpsb, cmpsw, cmpsd, cmpsq)", sizeof(struct elt), sizeof(struct comp), init_table, check_item, report_error, delete_table)
+CPUCHECK_CHECKER(cmps, "Performs string comparisons on different word sizes (cmpsb, cmpsw, cmpsd, cmpsq)", 0, sizeof(struct elt), sizeof(struct comp), init, check_item, report_error, delete)
 
 #endif	/* ARCH_X86_64 */
