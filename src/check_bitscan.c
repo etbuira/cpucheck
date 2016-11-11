@@ -60,9 +60,9 @@ static int init(void * const config, void *table, const size_t table_size)
 	return 0;
 }
 
-static int check_item(void * const comp, void const * const config, void const * const table, const size_t index)
+static int check_item(void * const comp, void const * const config, void const * const table_element)
 {
-	struct elt const * const elts = table;
+	struct elt const * const elt = table_element;
 	struct comp * const c = comp;
 
 	asm("bsfq %[a], %[ri] \n\t"
@@ -71,26 +71,26 @@ static int check_item(void * const comp, void const * const config, void const *
 		"setzb %[lz] \n\t"
 		: [ri] "=r" (c->ri), [rz] "=r" (c->rz),
 		  [li] "=r" (c->li), [lz] "=r" (c->lz)
-		: [a] "rm" (elts[index].a)
+		: [a] "rm" (elt->a)
 		: "cc"
 	);
 
 	return ! (
-		elts[index].zero == c->rz
+		elt->zero == c->rz
 		&& c->rz == c->lz
-		&& (c->rz || elts[index].ri == c->ri)
-		&& (c->rz || elts[index].li == c->li)
+		&& (c->rz || elt->ri == c->ri)
+		&& (c->rz || elt->li == c->li)
 	);
 }
 
-static void report_error(FILE *out, void const * const config, void const * const table, const size_t index, void const * const comp)
+static void report_error(FILE *out, void const * const config, void const * const table_element, void const * const comp)
 {
-	struct elt const * const elts = table;
+	struct elt const * const elt = table_element;
 	struct comp const * const c = comp;
 
-	fprintf(out, "a=0x%" PRIx64 "\n", elts[index].a);
-	fprintf(out, "Right index: expected=0x%" PRIx64 ", got=0x%" PRIx64 "\n", elts[index].ri, c->ri);
-	fprintf(out, "Left index: expected=0x%" PRIx64 ", got=0x%" PRIx64 "\n", elts[index].li, c->li);
+	fprintf(out, "a=0x%" PRIx64 "\n", elt->a);
+	fprintf(out, "Right index: expected=0x%" PRIx64 ", got=0x%" PRIx64 "\n", elt->ri, c->ri);
+	fprintf(out, "Left index: expected=0x%" PRIx64 ", got=0x%" PRIx64 "\n", elt->li, c->li);
 	fprintf(out, "Found bit set, by right: %s, by left: %s", c->rz?"false":"true", c->lz?"false":"true");
 }
 

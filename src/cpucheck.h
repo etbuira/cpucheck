@@ -27,8 +27,8 @@ struct cpucheck_checker {
 	size_t table_elt_size;
 	size_t comp_elt_size;
 	int (*init)(void * const config, void *table, const size_t table_size);
-	int (*check_item)(void * const comp, void const * const config, void const * const table, const size_t index);
-	void (*report_error)(FILE *out, void const * const config, void const * const table, const size_t index, void const * const comp);
+	int (*check_item)(void * const comp, void const * const config, void const * const table_element);
+	void (*report_error)(FILE *out, void const * const config, void const * const table_element, void const * const comp);
 	void (*delete)(void * const config, void *table, const size_t table_size);
 };
 

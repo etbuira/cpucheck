@@ -169,11 +169,12 @@ static void * thread_func(void *arg)
 
 	for (start=1 ; !thrd->state->should_exit ; start=0) {
 		for (idx = start ? thrd->start_idx : 0 ; idx<thrd->state->table_size && !thrd->state->should_exit ; idx++) {
-			if (thrd->state->checker->check_item(thrd->comp, thrd->state->checker_conf, thrd->state->table, idx)) {
+			void const * const elt = (char*)thrd->state->table + idx*thrd->state->checker->table_elt_size;
+			if (thrd->state->checker->check_item(thrd->comp, thrd->state->checker_conf, elt)) {
 				pthread_mutex_lock(&thrd->state->output);
 				fprintf(stderr, "Inconsistency detected...\n");
 				if (thrd->state->checker->report_error)
-					thrd->state->checker->report_error(stderr, thrd->state->checker_conf, thrd->state->table, idx, thrd->comp);
+					thrd->state->checker->report_error(stderr, thrd->state->checker_conf, elt, thrd->comp);
 				pthread_mutex_unlock(&thrd->state->output);
 				if (ULONG_MAX-thrd->inconsistencies)
 					thrd->inconsistencies++;

@@ -120,7 +120,7 @@ err:
 
 #define COMP_MISMATCH(arg_mm, arg_word_size, arg_cmp_op) do { \
 	size_t stridx, mmidx; \
-	const size_t len = elts[index].len/(arg_word_size); \
+	const size_t len = elt->len/(arg_word_size); \
 	\
 	for (stridx=0, mmidx=0 ; stridx < len ; ) { \
 		uint64_t rem_len = len-stridx; \
@@ -129,8 +129,8 @@ err:
 		asm("repz " arg_cmp_op " \n\t" \
 			"setzb %[zf] \n\t" \
 			: "+c" (rem_len), [zf] "=mr" (zf) \
-			: "S" (elts[index].a+stridx*(arg_word_size)), \
-			  "D" (elts[index].b+stridx*(arg_word_size)) \
+			: "S" (elt->a+stridx*(arg_word_size)), \
+			  "D" (elt->b+stridx*(arg_word_size)) \
 			: "cc" \
 		); \
 		\
@@ -147,9 +147,9 @@ err:
 	for ( ; mmidx < MISMATCH_COUNT ; mmidx++) \
 		(arg_mm)[mmidx] = -1; \
 } while (0);
-static int check_item(void * const comp, void const * const config, void const * const table, const size_t index)
+static int check_item(void * const comp, void const * const config, void const * const table_element)
 {
-	struct elt const * const elts = table;
+	struct elt const * const elt = table_element;
 	struct comp * const c = comp;
 	size_t i;
 
@@ -161,13 +161,13 @@ static int check_item(void * const comp, void const * const config, void const *
 	COMP_MISMATCH(c->mismatch_quad, 8, "cmpsq")
 
 	for(i=0 ; i<MISMATCH_COUNT ; i++) {
-		if (c->mismatch_byte[i] != elts[index].mismatch_byte[i])
+		if (c->mismatch_byte[i] != elt->mismatch_byte[i])
 			return 1;
-		if (c->mismatch_word[i] != elts[index].mismatch_word[i])
+		if (c->mismatch_word[i] != elt->mismatch_word[i])
 			return 1;
-		if (c->mismatch_double[i] != elts[index].mismatch_double[i])
+		if (c->mismatch_double[i] != elt->mismatch_double[i])
 			return 1;
-		if (c->mismatch_quad[i] != elts[index].mismatch_quad[i])
+		if (c->mismatch_quad[i] != elt->mismatch_quad[i])
 			return 1;
 	}
 	if (c->too_much)
@@ -186,18 +186,18 @@ static int check_item(void * const comp, void const * const config, void const *
 	for (i=0 ; i<MISMATCH_COUNT ; i++) \
 		fprintf(out, "%d%s", (arg_mm_got)[i], i==MISMATCH_COUNT-1 ? "\n" : ", "); \
 } while (0);
-static void report_error(FILE *out, void const * const config, void const * const table, const size_t index, void const * const comp)
+static void report_error(FILE *out, void const * const config, void const * const table_element, void const * const comp)
 {
-	struct elt const * const elts = table;
+	struct elt const * const elt = table_element;
 	struct comp const * const c = comp;
 
-	hex_dump(out, "a=", elts[index].a, elts[index].len);
-	hex_dump(out, "b=", elts[index].b, elts[index].len);
+	hex_dump(out, "a=", elt->a, elt->len);
+	hex_dump(out, "b=", elt->b, elt->len);
 
-	PRINT_MM("byte", elts[index].mismatch_byte, c->mismatch_byte)
-	PRINT_MM("word", elts[index].mismatch_word, c->mismatch_word)
-	PRINT_MM("double", elts[index].mismatch_double, c->mismatch_double)
-	PRINT_MM("quad", elts[index].mismatch_quad, c->mismatch_quad)
+	PRINT_MM("byte", elt->mismatch_byte, c->mismatch_byte)
+	PRINT_MM("word", elt->mismatch_word, c->mismatch_word)
+	PRINT_MM("double", elt->mismatch_double, c->mismatch_double)
+	PRINT_MM("quad", elt->mismatch_quad, c->mismatch_quad)
 	fprintf(out, "too much found: %s\n", c->too_much ? "yes" : "no");
 }
 #undef PRINT_MM

@@ -74,13 +74,13 @@ static int init(void * const config, void *table, const size_t table_size)
 	return 0;
 }
 
-static int check_item(void * const comp, void const * const config, void const * const table, const size_t index)
+static int check_item(void * const comp, void const * const config, void const * const table_element)
 {
-	struct elt const * const elts = table;
+	struct elt const * const elt = table_element;
 	struct comp * const c = comp;
 	size_t j;
 
-	for(j=0 ; j<sizeof(elts[index].tests)/sizeof(elts[index].tests[0]) ; j++) {
+	for(j=0 ; j<sizeof(elt->tests)/sizeof(elt->tests[0]) ; j++) {
 		asm("btq %[bidx], %[a] \n\t"
 			"setcb %[set_t] \n\t"
 			"movq %[a], %[res_tc] \n\t"
@@ -96,45 +96,45 @@ static int check_item(void * const comp, void const * const config, void const *
 		  [set_tc] "=r" (c->res[j].set_tc), [res_tc] "=r" (c->res[j].res_tc),
 		  [set_tr] "=r" (c->res[j].set_tr), [res_tr] "=r" (c->res[j].res_tr),
 		  [set_ts] "=r" (c->res[j].set_ts), [res_ts] "=r" (c->res[j].res_ts)
-		: [a] "mr" (elts[index].a),
-		  [bidx] "r" (elts[index].tests[j].bit_index)
+		: [a] "mr" (elt->a),
+		  [bidx] "r" (elt->tests[j].bit_index)
 		: "cc"
 		);
 	}
 
-	for(j=0 ; j<sizeof(elts[index].tests)/sizeof(elts[index].tests[0]) ; j++) {
-		if (c->res[j].set_t != elts[index].tests[j].set
+	for(j=0 ; j<sizeof(elt->tests)/sizeof(elt->tests[0]) ; j++) {
+		if (c->res[j].set_t != elt->tests[j].set
 				|| c->res[j].set_t != c->res[j].set_tc
 				|| c->res[j].set_tc != c->res[j].set_tr
 				|| c->res[j].set_tr != c->res[j].set_ts
-				|| c->res[j].res_tc != elts[index].tests[j].toggled
-				|| c->res[j].res_tr != elts[index].tests[j].cleared
-				|| c->res[j].res_ts != elts[index].tests[j].set_ts)
+				|| c->res[j].res_tc != elt->tests[j].toggled
+				|| c->res[j].res_tr != elt->tests[j].cleared
+				|| c->res[j].res_ts != elt->tests[j].set_ts)
 			return 1;
 	}
 
 	return 0;
 }
 
-static void report_error(FILE *out, void const * const config, void const * const table, const size_t index, void const * const comp)
+static void report_error(FILE *out, void const * const config, void const * const table_element, void const * const comp)
 {
-	struct elt const * const elts = table;
+	struct elt const * const elt = table_element;
 	struct comp const * const c = comp;
 	size_t j;
 
-	fprintf(out, "a=%" PRIx64 "\n", elts[index].a);
-	for(j=0 ; j<sizeof(elts[index].tests)/sizeof(elts[index].tests[0]) ; j++) {
-		fprintf(out, "Bit index=%" PRIx64 "\n", elts[index].tests[j].bit_index);
+	fprintf(out, "a=%" PRIx64 "\n", elt->a);
+	for(j=0 ; j<sizeof(elt->tests)/sizeof(elt->tests[0]) ; j++) {
+		fprintf(out, "Bit index=%" PRIx64 "\n", elt->tests[j].bit_index);
 		fprintf(out, "Bit set, expected: %s, got (bt): %s, got (btc): %s, got (btr): %s, got (bts): %s\n",
-					elts[index].tests[j].set?"yes":"no", c->res[j].set_t?"yes":"no",
+					elt->tests[j].set?"yes":"no", c->res[j].set_t?"yes":"no",
 					c->res[j].set_tc?"yes":"no", c->res[j].set_tr?"yes":"no",
 					c->res[j].set_ts?"yes":"no");
 		fprintf(out, "btc result, expected=%" PRIx64 ", got=%" PRIx64 "\n",
-					elts[index].tests[j].toggled, c->res[j].res_tc);
+					elt->tests[j].toggled, c->res[j].res_tc);
 		fprintf(out, "btr result, expected=%" PRIx64 ", got=%" PRIx64 "\n",
-					elts[index].tests[j].cleared, c->res[j].res_tr);
+					elt->tests[j].cleared, c->res[j].res_tr);
 		fprintf(out, "bts result, expected=%" PRIx64 ", got=%" PRIx64 "\n",
-					elts[index].tests[j].set_ts, c->res[j].res_ts);
+					elt->tests[j].set_ts, c->res[j].res_ts);
 	}
 }
 

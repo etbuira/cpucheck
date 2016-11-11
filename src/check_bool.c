@@ -56,32 +56,32 @@ static int init(void * const config, void *table, const size_t table_size)
 	return 0;
 }
 
-static int check_item(void * const comp, void const * const config, void const * const table, const size_t index)
+static int check_item(void * const comp, void const * const config, void const * const table_element)
 {
-	struct elt const * const elts = table;
+	struct elt const * const elt = table_element;
 	struct comp * const c = comp;
 
-	c->and = elts[index].a & elts[index].b;
-	c->or = elts[index].a | elts[index].b;
-	c->xor = elts[index].a ^ elts[index].b;
-	c->nota = ~elts[index].a;
+	c->and = elt->a & elt->b;
+	c->or = elt->a | elt->b;
+	c->xor = elt->a ^ elt->b;
+	c->nota = ~elt->a;
 
-	return ! (elts[index].and == c->and
-			&& elts[index].or == c->or
-			&& elts[index].xor == c->xor
-			&& elts[index].nota == c->nota);
+	return ! (elt->and == c->and
+			&& elt->or == c->or
+			&& elt->xor == c->xor
+			&& elt->nota == c->nota);
 }
 
-static void report_error(FILE *out, void const * const config, void const * const table, const size_t index, void const * const comp)
+static void report_error(FILE *out, void const * const config, void const * const table_element, void const * const comp)
 {
-	struct elt const * const elts = table;
+	struct elt const * const elt = table_element;
 	struct comp const * const c = comp;
 
-	fprintf(out, "a=0x%" PRIx64 ", b=0x%" PRIx64 "\n", elts[index].a, elts[index].b);
-	fprintf(out, "and: expected=0x%" PRIx64 ", got=0x%" PRIx64 "\n", elts[index].and, c->and);
-	fprintf(out, "or: expected=0x%" PRIx64 ", got=0x%" PRIx64 "\n", elts[index].or, c->or);
-	fprintf(out, "xor: expected=0x%" PRIx64 ", got=0x%" PRIx64 "\n", elts[index].xor, c->xor);
-	fprintf(out, "not a: expected=0x%" PRIx64 ", got=0x%" PRIx64 "\n", elts[index].nota, c->nota);
+	fprintf(out, "a=0x%" PRIx64 ", b=0x%" PRIx64 "\n", elt->a, elt->b);
+	fprintf(out, "and: expected=0x%" PRIx64 ", got=0x%" PRIx64 "\n", elt->and, c->and);
+	fprintf(out, "or: expected=0x%" PRIx64 ", got=0x%" PRIx64 "\n", elt->or, c->or);
+	fprintf(out, "xor: expected=0x%" PRIx64 ", got=0x%" PRIx64 "\n", elt->xor, c->xor);
+	fprintf(out, "not a: expected=0x%" PRIx64 ", got=0x%" PRIx64 "\n", elt->nota, c->nota);
 }
 
 CPUCHECK_CHECKER(bool, "Performs boolean and, or, xor, and not", 0, sizeof(struct elt), sizeof(struct comp), init, check_item, report_error, NULL)
