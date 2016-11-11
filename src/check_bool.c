@@ -37,7 +37,7 @@ struct comp {
 	uint64_t nota;
 };
 
-static int init(void * const config, void *table, const size_t table_size)
+static int init(void * const config, void * const table, const size_t table_size)
 {
 	size_t i;
 	struct elt * const elts = table;

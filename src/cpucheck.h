@@ -23,13 +23,13 @@
 struct cpucheck_checker {
 	char const * const name;
 	char const * const description;
-	size_t config_size;
-	size_t table_elt_size;
-	size_t comp_elt_size;
-	int (*init)(void * const config, void *table, const size_t table_size);
+	const size_t config_size;
+	const size_t table_elt_size;
+	const size_t comp_elt_size;
+	int (*init)(void * const config, void * const table, const size_t table_size);
 	int (*check_item)(void * const comp, void const * const config, void const * const table_element);
 	void (*report_error)(FILE *out, void const * const config, void const * const table_element, void const * const comp);
-	void (*delete)(void * const config, void *table, const size_t table_size);
+	void (*delete)(void * const config, void * const table, const size_t table_size);
 };
 
 #define CPUCHECK_CHECKER(arg_name, arg_description, arg_config_size, arg_table_elt_size, arg_comp_elt_size, arg_init, arg_check_item, arg_report_error, arg_delete) \

@@ -52,7 +52,7 @@ struct comp {
 	int64_t qword_exl;
 };
 
-static int init(void * const config, void *table, const size_t table_size)
+static int init(void * const config, void * const table, const size_t table_size)
 {
 	size_t i;
 	struct elt * const elts = table;

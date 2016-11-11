@@ -77,7 +77,7 @@ static void introduce_mismatches(struct elt * const elt)
 	}
 }
 
-static int init(void * const config, void *table, const size_t table_size)
+static int init(void * const config, void * const table, const size_t table_size)
 {
 	size_t i, j;
 	struct elt * const elts = table;
@@ -202,7 +202,7 @@ static void report_error(FILE *out, void const * const config, void const * cons
 }
 #undef PRINT_MM
 
-static void delete(void * const config, void *table, const size_t table_size)
+static void delete(void * const config, void * const table, const size_t table_size)
 {
 	struct elt * const elts = table;
 	size_t i;
