@@ -32,6 +32,13 @@ struct elt {
 	void const * mul8;
 };
 
+struct comp {
+	void const * nomul;
+	void const * mul2;
+	void const * mul4;
+	void const * mul8;
+};
+
 static int init_table(void * const config, void * const table, const size_t table_size)
 {
 	size_t i;
@@ -55,24 +62,24 @@ static int init_table(void * const config, void * const table, const size_t tabl
 static int check_item(void * const comp, void const * const config, void const * const table_element)
 {
 	struct elt const * const elt = table_element;
-	const void *nomul, *mul2, *mul4, *mul8;
+	struct comp * const c = comp;
 
 	asm("leaq (%[base], %[offset]), %[nomul] \n\t"
 		"leaq (%[base], %[offset], 2), %[mul2] \n\t"
 		"leaq (%[base], %[offset], 4), %[mul4] \n\t"
 		"leaq (%[base], %[offset], 8), %[mul8] \n\t"
-		: [nomul] "=r" (nomul), [mul2] "=r" (mul2),
-		  [mul4] "=r" (mul4), [mul8] "=r" (mul8)
+		: [nomul] "=r" (c->nomul), [mul2] "=r" (c->mul2),
+		  [mul4] "=r" (c->mul4), [mul8] "=r" (c->mul8)
 		: [base] "r" (elt->base), [offset] "r" (elt->offset)
 	);
 
-	return ! (nomul == elt->nomul
-				&& mul2 == elt->mul2
-				&& mul4 == elt->mul4
-				&& mul8 == elt->mul8);
+	return ! (c->nomul == elt->nomul
+				&& c->mul2 == elt->mul2
+				&& c->mul4 == elt->mul4
+				&& c->mul8 == elt->mul8);
 }
 
-CPUCHECK_CHECKER(lea, "Performs integer additions and multiplications using lea", 0, sizeof(struct elt), 0, init_table, check_item, NULL, NULL)
+CPUCHECK_CHECKER(lea, "Performs integer additions and multiplications using lea", 0, sizeof(struct elt), sizeof(struct comp), init_table, check_item, NULL, NULL)
 
 #endif /* ARCH_X86_64 */
 
