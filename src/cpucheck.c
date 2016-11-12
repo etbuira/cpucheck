@@ -48,6 +48,7 @@ extern struct cpucheck_checker cpucheck_checker_bool;
 #if ARCH_X86_64
 extern struct cpucheck_checker cpucheck_checker_cmps;
 extern struct cpucheck_checker cpucheck_checker_cmpxchg;
+extern struct cpucheck_checker cpucheck_checker_lea;
 #endif
 extern struct cpucheck_checker cpucheck_checker_muldiv;
 #if ARCH_X86_64
@@ -64,6 +65,7 @@ static struct cpucheck_checker const * const checkers[] = {
 #if ARCH_X86_64
 	&cpucheck_checker_cmps,
 	&cpucheck_checker_cmpxchg,
+	&cpucheck_checker_lea,
 #endif
 	&cpucheck_checker_muldiv,
 #if ARCH_X86_64
