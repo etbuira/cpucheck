@@ -20,6 +20,7 @@
 
 #include <stdlib.h>
 #include <stdint.h>
+#include <inttypes.h>
 #include <time.h>
 #include "cpucheck.h"
 
@@ -79,7 +80,19 @@ static int check_item(void * const comp, void const * const config, void const *
 				&& c->mul8 == elt->mul8);
 }
 
-CPUCHECK_CHECKER(lea, "Performs integer additions and multiplications using lea", 0, sizeof(struct elt), sizeof(struct comp), init_table, check_item, NULL, NULL)
+static void report_error(FILE *out, void const * const config, void const * const table_element, void const * const comp)
+{
+	struct elt const * const elt = table_element;
+	struct comp const * const c = comp;
+
+	fprintf(out, "base=%p, offset=0x%" PRIx64 "\n", elt->base, elt->offset);
+	fprintf(out, "nomul, expected=%p, got=%p\n", elt->nomul, c->nomul);
+	fprintf(out, "mul2, expected=%p, got=%p\n", elt->mul2, c->mul2);
+	fprintf(out, "mul4, expected=%p, got=%p\n", elt->mul4, c->mul4);
+	fprintf(out, "mul8, expected=%p, got=%p\n", elt->mul8, c->mul8);
+}
+
+CPUCHECK_CHECKER(lea, "Performs integer additions and multiplications using lea", 0, sizeof(struct elt), sizeof(struct comp), init_table, check_item, report_error, NULL)
 
 #endif /* ARCH_X86_64 */
 
