@@ -9,6 +9,7 @@ cpucheck_SOURCES = src/cpucheck.c src/cpucheck.h \
  src/check_cmps.c \
  src/check_cmpxchg.c \
  src/check_lea.c \
+ src/check_lodsstos.c \
  src/check_muldiv.c \
  src/check_signextend.c
 
