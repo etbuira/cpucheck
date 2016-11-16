@@ -69,8 +69,8 @@ static int check_item(void * const comp, void const * const config, void const *
 		"setzb %[rz] \n\t"
 		"bsrq %[a], %[li] \n\t"
 		"setzb %[lz] \n\t"
-		: [ri] "=r" (c->ri), [rz] "=r" (c->rz),
-		  [li] "=r" (c->li), [lz] "=r" (c->lz)
+		: [ri] "=&r" (c->ri), [rz] "=&r" (c->rz),
+		  [li] "=&r" (c->li), [lz] "=&r" (c->lz)
 		: [a] "rm" (elt->a)
 		: "cc"
 	);

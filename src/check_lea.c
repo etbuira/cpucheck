@@ -70,8 +70,8 @@ static int check_item(void * const comp, void const * const config, void const *
 		"leaq (%[base], %[offset], 2), %[mul2] \n\t"
 		"leaq (%[base], %[offset], 4), %[mul4] \n\t"
 		"leaq (%[base], %[offset], 8), %[mul8] \n\t"
-		: [nomul] "=r" (c->nomul), [mul2] "=r" (c->mul2),
-		  [mul4] "=r" (c->mul4), [mul8] "=r" (c->mul8)
+		: [nomul] "=&r" (c->nomul), [mul2] "=&r" (c->mul2),
+		  [mul4] "=&r" (c->mul4), [mul8] "=&r" (c->mul8)
 		: [base] "r" (elt->base), [offset] "r" (elt->offset)
 	);
 

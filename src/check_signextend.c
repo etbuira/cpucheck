@@ -102,11 +102,11 @@ static int check_item(void * const comp, void const * const config, void const *
 		"cqo \n\t"
 		"movq %%rax, %[qword_exl] \n\t"
 		"movq %%rdx, %[qword_exh] \n\t"
-		: [byte_ex] "=rm" (c->byte_ex), [word_ex] "=rm" (c->word_ex),
-		  [word_exl] "=rm" (c->word_exl), [word_exh] "=rm" (c->word_exh),
-		  [dword_ex] "=rm" (c->dword_ex), [dword_exl] "=rm" (c->dword_exl),
-		  [dword_exh] "=rm" (c->dword_exh), [qword_exl] "=rm" (c->qword_exl),
-		  [qword_exh] "=rm" (c->qword_exh)
+		: [byte_ex] "=&rm" (c->byte_ex), [word_ex] "=&rm" (c->word_ex),
+		  [word_exl] "=&rm" (c->word_exl), [word_exh] "=&rm" (c->word_exh),
+		  [dword_ex] "=&rm" (c->dword_ex), [dword_exl] "=&rm" (c->dword_exl),
+		  [dword_exh] "=&rm" (c->dword_exh), [qword_exl] "=&rm" (c->qword_exl),
+		  [qword_exh] "=&rm" (c->qword_exh)
 		: [byte] "rm" (elt->byte), [word] "rm" (elt->word),
 		  [dword] "rm" (elt->dword), [qword] "rm" (elt->qword)
 		: "rax", "rdx"

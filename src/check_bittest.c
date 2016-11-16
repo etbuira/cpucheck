@@ -92,10 +92,10 @@ static int check_item(void * const comp, void const * const config, void const *
 			"movq %[a], %[res_ts] \n\t"
 			"btsq %[bidx], %[res_ts] \n\t"
 			"setcb %[set_ts] \n\t"
-		: [set_t] "=r" (c->res[j].set_t),
-		  [set_tc] "=r" (c->res[j].set_tc), [res_tc] "=r" (c->res[j].res_tc),
-		  [set_tr] "=r" (c->res[j].set_tr), [res_tr] "=r" (c->res[j].res_tr),
-		  [set_ts] "=r" (c->res[j].set_ts), [res_ts] "=r" (c->res[j].res_ts)
+		: [set_t] "=&r" (c->res[j].set_t),
+		  [set_tc] "=&r" (c->res[j].set_tc), [res_tc] "=&r" (c->res[j].res_tc),
+		  [set_tr] "=&r" (c->res[j].set_tr), [res_tr] "=&r" (c->res[j].res_tr),
+		  [set_ts] "=&r" (c->res[j].set_ts), [res_ts] "=&r" (c->res[j].res_ts)
 		: [a] "mr" (elt->a),
 		  [bidx] "r" (elt->tests[j].bit_index)
 		: "cc"
