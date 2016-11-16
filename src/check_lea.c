@@ -48,14 +48,13 @@ static int init_table(void * const config, void * const table, const size_t tabl
 	srandom(time(NULL));
 
 	for (i=0 ; i<table_size ; i++) {
-		uintptr_t base;
-		base = random();
-		elts[i].base = (void*) base;
+		uint8_t *base;
+		base = elts[i].base = (void*) random();
 		elts[i].offset = random()%256;
-		elts[i].nomul = (void const *) (base+elts[i].offset);
-		elts[i].mul2 = (void const *) (base*3+elts[i].offset*2);
-		elts[i].mul4 = (void const *) (base*5+elts[i].offset*4);
-		elts[i].mul8 = (void const *) (base*9+elts[i].offset*8);
+		elts[i].nomul = base+elts[i].offset;
+		elts[i].mul2 = base+elts[i].offset*2;
+		elts[i].mul4 = base+elts[i].offset*4;
+		elts[i].mul8 = base+elts[i].offset*8;
 	}
 
 	return 0;
